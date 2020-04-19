@@ -2,42 +2,36 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
+type Mark = "X" | "O";
+
 type SquareProps = {
-  value: number;
+  value: Mark;
   onClick: () => void;
 };
 
-type SquareState = {
-  value: number | "X";
+const Square: React.FC<SquareProps> = (props: SquareProps) => {
+  return (
+    <button className="square" onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
 };
-class Square extends React.Component<SquareProps, SquareState> {
-  readonly state: SquareState = {
-    value: 0
-  };
-
-  render() {
-    return (
-      <button className="square" onClick={() => this.props.onClick()}>
-        {this.props.value}
-      </button>
-    );
-  }
-}
 
 type BoardState = {
-  squares: any;
+  squares: Mark[];
+  xIsNext: boolean;
 };
+
 class Board extends React.Component<{}, BoardState> {
   readonly state: BoardState = {
-    squares: Array(9).fill(null)
+    squares: Array(9).fill(null),
+    xIsNext: true
   };
 
   handleClick(i: number): void {
     const squares = this.state.squares.slice();
-
-    squares[i] = "X";
-    console.log(squares);
-    this.setState({ squares: squares });
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    this.setState({ squares: squares, xIsNext: !this.state.xIsNext });
   }
 
   renderSquare(i: number) {
@@ -50,7 +44,7 @@ class Board extends React.Component<{}, BoardState> {
   }
 
   render() {
-    const status = "Next player: X";
+    const status = `Next player: ${this.state.xIsNext ? "X" : "O"}`;
 
     return (
       <div>
