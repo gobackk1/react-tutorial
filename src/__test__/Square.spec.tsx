@@ -1,33 +1,37 @@
 import React from "react";
-import { shallow } from "enzyme";
+import { shallow, ShallowWrapper } from "enzyme";
 import { Square } from "../components/Square";
+import { shallowToJson } from "enzyme-to-json";
 
 describe("Squareコンポーネントのテスト", () => {
-  describe("propsのテスト", () => {
-    const mockFunction = jest.fn();
+  const handleClickSpy = jest.fn();
+  let wrapper: ShallowWrapper;
+  beforeEach(() => {
+    wrapper = shallow(
+      <Square
+        value={"X"}
+        onClick={() => {
+          handleClickSpy();
+        }}
+      />
+    );
+  });
 
-    test("valueのテスト", () => {
-      const wrapper = shallow(<Square value={"X"} onClick={() => {}} />);
+  describe("propsのテスト", () => {
+    test("valueの文字列が表示されること", () => {
       expect(wrapper.text()).toContain("X");
+      wrapper.setProps({ value: "O" });
+      expect(wrapper.text()).toContain("O");
     });
 
-    test("onClickのテスト", () => {
-      const wrapper = shallow(
-        <Square
-          value={"X"}
-          onClick={() => {
-            mockFunction();
-          }}
-        />
-      );
+    test("onClickが呼び出されること", () => {
       wrapper.simulate("click");
-      expect(mockFunction).toHaveBeenCalled();
+      expect(handleClickSpy).toHaveBeenCalled();
     });
   });
-});
 
-// describe("create snapshot", () => {
-//   const component = renderer.create(<Square value={"X"} onClick={() => {}} />);
-//   let tree = component.toJSON();
-//   expect(tree).toMatchSnapshot();
-// });
+  test("snapshot", () => {
+    const snapshot = shallowToJson(wrapper);
+    expect(snapshot).toMatchSnapshot();
+  });
+});

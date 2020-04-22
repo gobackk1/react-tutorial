@@ -1,1 +1,1 @@
-export type Mark = "X" | "O";
+export type Mark = "X" | "O" | null;

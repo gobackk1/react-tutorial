@@ -5,7 +5,6 @@ import { Mark } from "../types";
 type BoardProps = {
   squares: Mark[];
   onClick: (i: number) => void;
-  // handleClick: (i: number) => void;
 };
 
 export default class Board extends React.Component<BoardProps, {}> {
@@ -14,6 +13,7 @@ export default class Board extends React.Component<BoardProps, {}> {
       <Square
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
+        data-index={i.toString()}
       />
     );
   }
