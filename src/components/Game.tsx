@@ -1,63 +1,34 @@
 import React from "react";
 import { Mark } from "../types";
 import Board from "./Board";
+import { jumpToPast, clickSquare } from "../actions";
+import { connect } from "react-redux";
+import { AppState } from "../reducers";
+import { GameState } from "../reducers/game";
 
-type GameState = {
-  xIsNext: boolean;
-  stepNumber: number;
-  history: { squares: Mark[] }[];
+type GameProps = {
+  clickSquare: (index: number) => void;
+  jumpToPast: (step: number) => void;
+  game: GameState;
 };
-
-export default class Game extends React.Component<{}, GameState> {
-  readonly state: GameState = {
-    xIsNext: true,
-    stepNumber: 0,
-    history: [
-      {
-        squares: Array(9).fill(null)
-      }
-    ]
-  };
-
-  handleClick(i: number): void {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
-
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-
-    squares[i] = this.state.xIsNext ? "X" : "O";
-
-    this.setState({
-      history: history.concat([{ squares }]),
-      xIsNext: !this.state.xIsNext,
-      stepNumber: history.length
-    });
-  }
-
-  jumpTo(step: number): void {
-    this.setState({
-      stepNumber: step,
-      xIsNext: step % 2 === 0
-    });
-  }
-
+export class Game extends React.Component<GameProps, {}> {
+  static defaultProps: any = {};
   render() {
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
+    console.log(this.props);
+
+    const history = this.props.game.history;
+    const current = history[this.props.game.stepNumber];
     const winner = calculateWinner(current.squares);
     const status = winner
       ? `winner: ${winner}`
-      : `Next player: ${this.state.xIsNext ? "X" : "O"}`;
+      : `Next player: ${this.props.game.xIsNext ? "X" : "O"}`;
 
     const moves = history.map((step, move) => {
       const desc = move ? `Go to move #${move}` : "Go to game start";
 
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button onClick={() => this.props.jumpToPast(move)}>{desc}</button>
         </li>
       );
     });
@@ -65,7 +36,10 @@ export default class Game extends React.Component<{}, GameState> {
     return (
       <div className="game">
         <div className="game-board">
-          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
+          <Board
+            squares={current.squares}
+            onClick={index => this.props.clickSquare(index)}
+          />
         </div>
         <div className="game-info">
           <div>{status}</div>
@@ -75,6 +49,10 @@ export default class Game extends React.Component<{}, GameState> {
     );
   }
 }
+const mapStateToProps = (state: AppState) => ({ game: state.game });
+const mapDispatchToProps = { clickSquare, jumpToPast };
+
+export default connect(mapStateToProps, mapDispatchToProps)(Game);
 
 const calculateWinner = (squares: Mark[]) => {
   const lines = [
